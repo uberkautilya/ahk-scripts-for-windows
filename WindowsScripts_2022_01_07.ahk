@@ -36,7 +36,7 @@ global flag_uppercase := 0
 ^+u::
     {
         toggleUpperCase()
-        SetTimer, resetFlags, -2000
+        SetTimer, resetFlags, -3000
         return
     }
 #IfWinActive, ahk_exe Notion.exe,
@@ -1365,7 +1365,7 @@ renameFileDir()
 ^+v::
     {
         toggleTitleCase()
-        SetTimer, resetFlags, -2000
+        SetTimer, resetFlags, -3000
         return
     }
 
