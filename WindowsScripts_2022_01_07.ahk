@@ -74,6 +74,22 @@ global flag_uppercase := 0
                 Gui, Show
                 return
             }
+        ^e::
+            {
+                temp :=ClipboardAll
+                Clipboard:=""
+                SendInput, ^c
+                ClipWait, 1
+                if(RegExMatch(Clipboard, "[\x{0020}\x{00A0}\x{1680}\x{180E}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}\x{2006}\x{2007}\x{2008}\x{2009}\x{200A}\x{200B}\x{202F}\x{205F}\x{3000}\x{FEFF}\s,.:;’""']$"))
+                {
+                    SendInput, +{Left}
+                }
+                SendInput, ^e
+                keysUp()
+                Clipboard:=temp
+                return
+            }
+        
         ;! is used to represent <Alt>
         !4::
             {
@@ -363,7 +379,7 @@ global flag_uppercase := 0
                 while (Clipboard!="")
                 {
                     Clipboard:=""
-                    Sleep, 20
+                    Sleep, 50
                 }
 
                 SendInput, ^c
@@ -379,7 +395,7 @@ global flag_uppercase := 0
                 SendInput, @
                 SendInput, ^v
                 keysUp()
-                Sleep, 500
+                Sleep, 200
                 Clipboard := temp
                 temp:=""
                 return
@@ -527,12 +543,11 @@ global flag_uppercase := 0
         F8::
             {
                 ; MsgBox, 1, Title, "F8 Pressed", 5
-                KeyWait, Delete
-                KeyWait, Ctrl
-                KeyWait, Shift
+                keysUp()
                 SendInput, {Enter}
                 Sleep, 50
                 SendInput, {Delete}
+                keysUp()
                 return
             }
 
