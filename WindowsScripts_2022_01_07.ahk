@@ -532,9 +532,7 @@ global flag_uppercase := 0
 
         F7::
             {
-                KeyWait, Delete
-                KeyWait, Ctrl
-                KeyWait, Shift
+                keysUp()
                 SendInput, {Escape}
                 Sleep, 50
                 SendInput, {Delete}
