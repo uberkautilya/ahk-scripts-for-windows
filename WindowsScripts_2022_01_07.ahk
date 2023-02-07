@@ -80,16 +80,24 @@ global flag_uppercase := 0
                 Clipboard:=""
                 SendInput, ^c
                 ClipWait, 1
-                if(RegExMatch(Clipboard, "[\x{0020}\x{00A0}\x{1680}\x{180E}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}\x{2006}\x{2007}\x{2008}\x{2009}\x{200A}\x{200B}\x{202F}\x{205F}\x{3000}\x{FEFF}\s,.:;’""']$"))
-                {
-                    SendInput, +{Left}
-                }
+                escapeSpaceAtEndOfSelection()
                 SendInput, ^e
                 keysUp()
                 Clipboard:=temp
                 return
             }
-        
+        ^+h::
+            {
+                temp :=ClipboardAll
+                Clipboard:=""
+                SendInput, ^c
+                ClipWait, 1
+                escapeSpaceAtEndOfSelection()
+                SendInput, ^+h
+                keysUp()
+                Clipboard:=temp
+                return
+            }
         ;! is used to represent <Alt>
         !4::
             {
@@ -104,7 +112,7 @@ global flag_uppercase := 0
                 return
             }
 
-            #`::
+        #`::
             {
                 temp :=ClipboardAll
                 Clipboard:=""
@@ -271,7 +279,7 @@ global flag_uppercase := 0
                 return
             }
 
-            `::
+        `::
             {
                 temp :=ClipboardAll
                 Clipboard:=""
@@ -308,7 +316,7 @@ global flag_uppercase := 0
                 temp:=""
                 return
             }
-            !`::
+        !`::
             {
                 temp :=ClipboardAll
                 Clipboard:=""
@@ -854,7 +862,7 @@ global flag_uppercase := 0
                     SetTimer, *F1 Up, % (F1:=!F1)?100:"Off"
                     return
                 }
-                *F1 Up::
+            *F1 Up::
                 {
                     ToolTip, % KeyCombination(), 1000, 15
                     return
@@ -1471,67 +1479,74 @@ renameFileDir()
                 Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" http://www.google.com/search?hl=en&q=%searchQuery%
 else
     Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" %searchQuery%
-}
-else
-    Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" http://www.google.com/search?hl=en&q=%searchQuery%
-return
+        }
+        else
+            Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" http://www.google.com/search?hl=en&q=%searchQuery%
+    return
 
-^+g::
-    {
-        BlockInput, on
-        prevClipboard = %ClipboardAll%
-        clipboard =
-        Send, ^c
-        BlockInput, off
-        ClipWait, 2
-        if ErrorLevel = 0
+    ^+g::
         {
-            searchQuery=%clipboard%
-            GoSub, GoogleImageSearch
+            BlockInput, on
+            prevClipboard = %ClipboardAll%
+            clipboard =
+            Send, ^c
+            BlockInput, off
+            ClipWait, 2
+            if ErrorLevel = 0
+            {
+                searchQuery=%clipboard%
+                GoSub, GoogleImageSearch
+            }
+            clipboard = %prevClipboard%
+            VarSetCapacity(prevClipboard, 0)
+            keysUp()
+            return
         }
-        clipboard = %prevClipboard%
-        VarSetCapacity(prevClipboard, 0)
-        keysUp()
-        return
-    }
-GoogleImageSearch:
-    StringReplace, searchQuery, searchQuery, `r`n, %A_Space%, All
-    searchQuery := %searchQuery% + " map"
-    Loop
-    {
-        noExtraSpaces:=1
-        StringLeft, leftMost, searchQuery, 1
-        IfInString, leftMost, %A_Space%
+    GoogleImageSearch:
+        StringReplace, searchQuery, searchQuery, `r`n, %A_Space%, All
+        searchQuery := %searchQuery% + " map"
+        Loop
         {
-            StringTrimLeft, searchQuery, searchQuery, 1
-            noExtraSpaces:=0
+            noExtraSpaces:=1
+            StringLeft, leftMost, searchQuery, 1
+            IfInString, leftMost, %A_Space%
+            {
+                StringTrimLeft, searchQuery, searchQuery, 1
+                noExtraSpaces:=0
+            }
+            StringRight, rightMost, searchQuery, 1
+            IfInString, rightMost, %A_Space%
+            {
+                StringTrimRight, searchQuery, searchQuery, 1
+                noExtraSpaces:=0
+            }
+            If (noExtraSpaces==1)
+                break
         }
-        StringRight, rightMost, searchQuery, 1
-        IfInString, rightMost, %A_Space%
+        StringReplace, searchQuery, searchQuery, \, `%5C, All
+        StringReplace, searchQuery, searchQuery, %A_Space%, +, All
+        StringReplace, searchQuery, searchQuery, `%, `%25, All
+        IfInString, searchQuery, .
         {
-            StringTrimRight, searchQuery, searchQuery, 1
-            noExtraSpaces:=0
-        }
-        If (noExtraSpaces==1)
-            break
-    }
-    StringReplace, searchQuery, searchQuery, \, `%5C, All
-    StringReplace, searchQuery, searchQuery, %A_Space%, +, All
-    StringReplace, searchQuery, searchQuery, `%, `%25, All
-    IfInString, searchQuery, .
-    {
-        IfInString, searchQuery, +
-            Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" http://www.google.com/search?hl=en&q=%searchQuery%&tbm=isch
+            IfInString, searchQuery, +
+                Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" http://www.google.com/search?hl=en&q=%searchQuery%&tbm=isch
 else
     Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" %searchQuery%
-}
-else
-    Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" http://www.google.com/search?hl=en&q=%searchQuery%&tbm=isch
-return
+        }
+        else
+            Run, "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" http://www.google.com/search?hl=en&q=%searchQuery%&tbm=isch
+    return
 
-resetFlags()
-{
-    flag_titlecase := 0
-    flag_uppercase := 0
-Return
-}
+    resetFlags()
+    {
+        flag_titlecase := 0
+        flag_uppercase := 0
+        Return
+    }
+    escapeSpaceAtEndOfSelection(){
+
+        if(RegExMatch(Clipboard, "[\x{0020}\x{00A0}\x{1680}\x{180E}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}\x{2006}\x{2007}\x{2008}\x{2009}\x{200A}\x{200B}\x{202F}\x{205F}\x{3000}\x{FEFF}\s,.:;’""']$"))
+        {
+            SendInput, +{Left}
+        }
+    }
