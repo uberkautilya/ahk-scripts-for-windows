@@ -98,6 +98,18 @@ global flag_uppercase := 0
                 Clipboard:=temp
                 return
             }
+        ^i::
+            {
+                temp :=ClipboardAll
+                Clipboard:=""
+                SendInput, ^c
+                ClipWait, 1
+                escapeSpaceAtEndOfSelection()
+                SendInput, ^i
+                keysUp()
+                Clipboard:=temp
+                return
+            }
         ;! is used to represent <Alt>
         !4::
             {
