@@ -4,6 +4,12 @@ SendMode Input ; Recommended for new scripts due to its superior speed and relia
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 global flag_titlecase := 0
 global flag_uppercase := 0
+global flag_lowercase := 0
+
+!^r:: 
+    MsgBox, 0, Information, Script Reloading, 0.5
+    Reload
+    Return
 
 ;^ is used to represent <Ctrl>
 #IfWinActive, ahk_exe Code.exe,
@@ -36,6 +42,13 @@ global flag_uppercase := 0
 ^+u::
     {
         toggleUpperCase()
+        SetTimer, resetFlags, -3000
+        return
+    }
+
+    ^+l::
+    {
+        toggleLowerCase()
         SetTimer, resetFlags, -3000
         return
     }
@@ -208,13 +221,12 @@ global flag_uppercase := 0
                 keysUp()
                 return
             }
-        !^Enter::
+        ^Enter::
             {
                 keysUp()
                 SendInput, {Home}
-                ; Sleep, 50
-                SendInput, {Enter}{Up}
-                keysUp()
+                SendInput, {Enter}
+                SendEvent, {Up}
                 return
             }
         #c::
@@ -596,7 +608,7 @@ global flag_uppercase := 0
                 Clipboard:=RegExReplace(Clipboard, "[\x{F0FA}\x{2022}\x{25AA}]+", "`n`n")
                 KeyWait, LWin
                 SendInput, ^v
-                Sleep, 600
+                Sleep, 300
                 Clipboard:=temp
                 keysUp()
                 return
@@ -701,12 +713,12 @@ global flag_uppercase := 0
 
 #IfWinActive, ahk_exe Code.exe,
     {
-        MButton::
-            {
-                SendInput, +{LButton}
-                keysUp()
-                return
-            }
+        ; MButton::
+        ;     {
+        ;         SendInput, +{LButton}
+        ;         keysUp()
+        ;         return
+        ;     }
         F1::
             {
                 encloseInQuotes()
@@ -1373,6 +1385,36 @@ renameFileDir()
         return
     }
 
+    toggleLowerCase(){
+        temp :=ClipboardAll
+        Clipboard:=""
+        SendInput, ^c
+        ClipWait, 1
+        if(RegExMatch(Clipboard, "[\x{0020}\x{00A0}\x{1680}\x{180E}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}\x{2006}\x{2007}\x{2008}\x{2009}\x{200A}\x{200B}\x{202F}\x{205F}\x{3000}\x{FEFF}\s,.:;]$")){
+            Clipboard:=""
+            SendInput,+{Left}
+            SendInput ^c
+            ClipWait, 1
+        }
+        If (flag_lowercase < 2){
+            flag_lowercase := flag_lowercase + 1
+        }Else{
+            flag_lowercase = 1
+        }
+        switch flag_lowercase
+        {
+        case 1: StringLower, Clipboard, Clipboard,
+        case 2: StringUpper, Clipboard, Clipboard,
+        default: MsgBox, 1, "Value of flag_lowercase", %flag_lowercase%,
+        }
+        SendInput, ^v
+        keysUp()
+        Sleep, 200
+        Clipboard:=temp
+        temp:=""
+        return
+    }
+
     checkIfEndSpecialCharacter()
     {
         SendInput, ^c
@@ -1553,6 +1595,7 @@ else
     {
         flag_titlecase := 0
         flag_uppercase := 0
+        flag_lowercase := 0
         Return
     }
     escapeSpaceAtEndOfSelection(){
