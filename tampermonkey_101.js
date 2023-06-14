@@ -39,6 +39,7 @@ window.addEventListener('load', function () {
     const underlinedTexts = document.querySelectorAll('span[style*="text-decoration: underline"]');
     underlinedTexts.forEach(uText => uText.style.removeProperty('text-decoration'))
 
+    //Copying to the clipboard doesn't work as desired yet
     this.navigator.clipboard.writeText(this.document.body.innerText);
 });
 
