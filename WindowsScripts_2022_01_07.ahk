@@ -6,10 +6,10 @@ global flag_titlecase := 0
 global flag_uppercase := 0
 global flag_lowercase := 0
 
-!^r:: 
+!^r::
     MsgBox, 0, Information, Script Reloading, 0.5
     Reload
-    Return
+Return
 
 ;^ is used to represent <Ctrl>
 #IfWinActive, ahk_exe Code.exe,
@@ -46,7 +46,7 @@ global flag_lowercase := 0
         return
     }
 
-    ^+l::
+^+l::
     {
         toggleLowerCase()
         SetTimer, resetFlags, -3000
@@ -81,7 +81,7 @@ global flag_lowercase := 0
                 Gui, Add, Text, , F7: Delete block
                 Gui, Add, Text, , F8: Enter then delete
                 Gui, Add, Text, , Alt + F: Replace whitespace characters with simple space
-                Gui, Add, Text, , Ctrl + Shift + F: Reformat block
+                Gui, Add, Text, , F12: Reformat block
                 Gui, Add, Text, , Ctrl + Shift + ]: Make bullets in properties
                 Gui, Add, Button, , OK
                 Gui, Show
@@ -469,10 +469,11 @@ global flag_lowercase := 0
             {
                 temp:=Clipboard
                 Sleep, 50
-                Clipboard:="turnintoh3"
+                Clipboard:="turntoggleh1"
                 SendInput, /
                 Sleep, 50
                 SendInput, ^v
+                Sleep, 50
                 SendInput, {Enter}
                 Sleep, 300
                 Clipboard:=temp
@@ -591,7 +592,7 @@ global flag_lowercase := 0
                 keysUp()
                 return
             }
-        ^+f::
+        F12::
             {
                 temp := ClipboardAll
                 Clipboard:=""
@@ -1003,6 +1004,12 @@ renameFileDir()
         keysUp()
         return
     }
+!+d::
+    {
+        pasteDate()
+        keysUp()
+        return
+    }
 
     getCurrentDate()
     {
@@ -1035,10 +1042,13 @@ renameFileDir()
 
     pasteDate()
     {
-        date := getCurrentDate()
-        KeyWait, d
-        SendInput, %date%
-        SendInput, {Ctrl Up}
+        temp :=ClipboardAll
+        Sleep, 100
+        Clipboard := getCurrentDate()
+        ClipWait, 1
+        SendInput, ^v
+        Sleep, 500
+        Clipboard:=temp
         return
     }
 
