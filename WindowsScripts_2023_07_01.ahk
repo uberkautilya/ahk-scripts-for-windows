@@ -11,6 +11,24 @@ global flag_lowercase := 0
     Reload
 Return
 
+; Suspend command suspends the script, while still permitting Suspend toggle so it can be turned on again
+; A_IsSuspended is a built in variable in AutoHotKey. Refer Documentation for more.
+^!s::
+    {
+        Suspend, Permit
+        Suspend, Toggle
+        if A_IsSuspended=1
+        {
+            MsgBox, 0, Information, Script Suspended, 1.5
+        }
+        if A_IsSuspended=0
+        {
+            MsgBox, 0, Warning, Script Active, 1.5
+        }
+        keysUp()
+        return
+    }
+
 ;^ is used to represent <Ctrl>
 #IfWinActive, ahk_exe Code.exe,
     {
@@ -20,38 +38,22 @@ Return
             Sleep 1000 ; If successful, the reload will close this instance during the Sleep, so the line below will never be reached.
         return
     }
-    ; Suspend command suspends the script, while still permitting Suspend toggle so it can be turned on again
-    ; A_IsSuspended is a built in variable in AutoHotKey. Refer Documentation for more.
-    ^!s::
-        {
-            Suspend, Permit
-            Suspend, Toggle
-            if A_IsSuspended=1
-            {
-                MsgBox, 0, Information, Script Suspended, 1.5
-            }
-            if A_IsSuspended=0
-            {
-                MsgBox, 0, Warning, Script Active, 1.5
-            }
-            keysUp()
-            return
-        }
 #IfWinActive
 
 ^+u::
     {
         toggleUpperCase()
-        SetTimer, resetFlags, -3000
+        SetTimer, resetFlags, -2000
         return
     }
 
 ^+l::
     {
         toggleLowerCase()
-        SetTimer, resetFlags, -3000
+        SetTimer, resetFlags, -2000
         return
     }
+
 #IfWinActive, ahk_exe Notion.exe,
     {
         F1::
@@ -533,7 +535,7 @@ Return
                 SendInput, {BackSpace}
                 SendInput, ^u^i
                 ; Sleep, 100
-                SendInput, %Clipboard%
+                SendInput, ^v
                 Sleep, 50
                 SendInput, ^u^i
                 keysUp()
@@ -544,10 +546,28 @@ Return
             }
         F5::
             {
-                SendInput, {Enter}
-                Sleep, 50
-                SendInput, {Tab}
-                return
+                temp := ClipboardAll
+                ControlGetText, text, Control
+                if(text==""){
+                    MsgBox, 0, Information, No text selected, 0.5
+                    ; SendInput, {Enter}
+                    ; Sleep, 50
+                    ; SendInput, {Tab}
+                    return
+                } else{
+                    MsgBox, 0, Information, Text Selected, 0.5
+                    temp := ClipboardAll
+                    Clipboard := ""
+                    pos = 0
+                    pos:=checkIfEndSpecialCharacter()
+                    if(pos!=0){
+                        SendInput,+{Left}
+                    }
+                    SendInput,^+h^i
+                    return
+                }
+                Clipboard := temp
+
             }
         F6::
             {
@@ -646,6 +666,15 @@ Return
                 return
             }
         }
+#IfWinActive
+
+#IfWinActive, ahk_exe Notepad.exe,
+    F5::
+        ControlGetText, text, Selected
+        ListVars
+        MsgBox, 0, Information, %text%, 0.5
+    Return
+
 #IfWinActive
 
 #IfWinActive, ahk_exe OneNote.exe,
@@ -1450,7 +1479,7 @@ renameFileDir()
 ^+v::
     {
         toggleTitleCase()
-        SetTimer, resetFlags, -3000
+        SetTimer, resetFlags, -2000
         return
     }
 
