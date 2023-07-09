@@ -546,28 +546,10 @@ Return
             }
         F5::
             {
-                temp := ClipboardAll
-                ControlGetText, text, Control
-                if(text==""){
-                    MsgBox, 0, Information, No text selected, 0.5
-                    ; SendInput, {Enter}
-                    ; Sleep, 50
-                    ; SendInput, {Tab}
+                SendInput, {Enter}
+                Sleep, 50
+                SendInput, {Tab}
                     return
-                } else{
-                    MsgBox, 0, Information, Text Selected, 0.5
-                    temp := ClipboardAll
-                    Clipboard := ""
-                    pos = 0
-                    pos:=checkIfEndSpecialCharacter()
-                    if(pos!=0){
-                        SendInput,+{Left}
-                    }
-                    SendInput,^+h^i
-                    return
-                }
-                Clipboard := temp
-
             }
         F6::
             {
@@ -666,15 +648,6 @@ Return
                 return
             }
         }
-#IfWinActive
-
-#IfWinActive, ahk_exe Notepad.exe,
-    F5::
-        ControlGetText, text, Selected
-        ListVars
-        MsgBox, 0, Information, %text%, 0.5
-    Return
-
 #IfWinActive
 
 #IfWinActive, ahk_exe OneNote.exe,
