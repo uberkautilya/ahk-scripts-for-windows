@@ -546,13 +546,6 @@ Return
             }
         F5::
             {
-                SendInput, {Enter}
-                Sleep, 50
-                SendInput, {Tab}
-                    return
-            }
-        F6::
-            {
                 temp := ClipboardAll
                 Clipboard := ""
                 pos = 0
@@ -562,6 +555,13 @@ Return
                 }
                 SendInput,^+h^i
                 Clipboard := temp
+                return
+            }
+        F6::
+            {
+                SendInput, {Enter}
+                Sleep, 50
+                SendInput, {Tab}
                 return
             }
 
